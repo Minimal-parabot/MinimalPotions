@@ -1,5 +1,6 @@
 package org.parabot.minimal.minimalpotions;
 
+import org.parabot.core.ui.Logger;
 import org.parabot.environment.api.utils.Time;
 import org.parabot.environment.scripts.framework.SleepCondition;
 import org.parabot.environment.scripts.framework.Strategy;
@@ -9,31 +10,28 @@ import org.rev317.min.api.wrappers.Item;
 
 public class MakeFlasks implements Strategy
 {
-    private final Potion POTION;
-    private final int POTION_ID;
+    private final Potion potion;
 
-    public MakeFlasks(final Potion POTION)
+    public MakeFlasks(Potion potion)
     {
-        this.POTION = POTION;
-
-        this.POTION_ID = POTION.getId();
+        this.potion = potion;
     }
 
     @Override
     public boolean activate()
     {
-        return POTION.isFlaskable()
-                && Inventory.getCount(POTION_ID) >= 2;
+        return potion.isFlaskable()
+                && Inventory.getCount(potion.getId()) >= 2;
     }
 
     @Override
     public void execute()
     {
-        Item[] potions = Inventory.getItems(POTION_ID);
+        Item[] potions = Inventory.getItems(potion.getId());
 
         if (potions != null)
         {
-            MinimalPotions.status = "Making flasks";
+            Logger.addMessage("Making flasks", true);
 
             Menu.sendAction(447, potions[0].getId() - 1, potions[0].getSlot(), 3214);
             Time.sleep(50);
@@ -46,7 +44,7 @@ public class MakeFlasks implements Strategy
                 @Override
                 public boolean isValid()
                 {
-                    return !Inventory.contains(POTION_ID);
+                    return !Inventory.contains(potion.getId());
                 }
             }, 250);
         }

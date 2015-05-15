@@ -9,12 +9,6 @@ public enum Potion
     RECOVER_SPECIAL(84, 15302, "Super energy(3)", 3019, "Papaya fruit", 5973, true),
     SUPER_ANTIFIRE(85, 15306, "Antifire(3)", 2455, "Phoenix feather", 4622, false);
 
-    @Override
-    public String toString()
-    {
-        return name().charAt(0) + name().substring(1).toLowerCase().replace("_", " ") + " (" + level + ")";
-    }
-
     private int level;
     private int id;
     private String primaryName;
@@ -67,5 +61,11 @@ public enum Potion
     public boolean isFlaskable()
     {
         return isFlaskable;
+    }
+
+    @Override
+    public String toString()
+    {
+        return name().charAt(0) + name().substring(1).toLowerCase().replace("_", " ") + " (" + level + ")";
     }
 }

@@ -1,5 +1,6 @@
 package org.parabot.minimal.minimalpotions;
 
+import org.parabot.core.ui.Logger;
 import org.parabot.environment.api.utils.Time;
 import org.parabot.environment.input.Keyboard;
 import org.parabot.environment.scripts.framework.SleepCondition;
@@ -19,7 +20,7 @@ public class Relog implements Strategy
     @Override
     public void execute()
     {
-        MinimalPotions.status = "Relogging";
+        Logger.addMessage("Relogging", true);
 
         Keyboard.getInstance().clickKey(KeyEvent.VK_ENTER);
 
@@ -34,7 +35,7 @@ public class Relog implements Strategy
 
         if (Game.isLoggedIn())
         {
-            MinimalPotions.status += "..";
+            Logger.addMessage("Waiting aftet relog..", true);
 
             Time.sleep(5000);
         }

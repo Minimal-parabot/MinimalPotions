@@ -1,6 +1,7 @@
 package org.parabot.minimal.minimalpotions;
 
 import org.parabot.core.Context;
+import org.parabot.core.ui.Logger;
 import org.parabot.environment.api.utils.Time;
 import org.parabot.environment.scripts.Script;
 import org.parabot.environment.scripts.framework.SleepCondition;
@@ -11,22 +12,22 @@ import org.rev317.min.api.wrappers.SceneObject;
 
 public class Banker implements Strategy
 {
-    private final int PRIMARY_ID;
-    private final int SECONDARY_ID;
+    private final int primaryId;
+    private final int secondaryId;
 
-    public Banker(final Potion POTION)
+    public Banker(Potion potion)
     {
-        this.PRIMARY_ID = POTION.getPrimaryId();
-        this.SECONDARY_ID = POTION.getSecondaryId();
+        this.primaryId = potion.getPrimaryId();
+        this.secondaryId = potion.getSecondaryId();
     }
 
-    private final int BANK_BOOTH_ID = 2213;
+    private static final int BANK_BOOTH_ID = 2213;
 
     @Override
     public boolean activate()
     {
         return SceneObjects.getNearest(BANK_BOOTH_ID).length > 0
-                && !Inventory.contains(PRIMARY_ID, SECONDARY_ID);
+                && !Inventory.contains(primaryId, secondaryId);
     }
     
     @Override
@@ -38,7 +39,9 @@ public class Banker implements Strategy
 
             if (bankBooth != null)
             {
-                bankBooth.interact(0);
+                Logger.addMessage("Opening bank booth", true);
+
+                bankBooth.interact(SceneObjects.Option.OPEN);
 
                 Time.sleep(new SleepCondition()
                 {
@@ -55,6 +58,8 @@ public class Banker implements Strategy
         {
             if (!Inventory.isEmpty())
             {
+                Logger.addMessage("Depositing inventory", true);
+
                 Menu.clickButton(21012);
 
                 Time.sleep(new SleepCondition()
@@ -72,14 +77,16 @@ public class Banker implements Strategy
                 Item primary = null;
                 Item secondary = null;
                 
-                if (Bank.getItem(PRIMARY_ID) != null)
-                    primary = Bank.getItem(PRIMARY_ID);
+                if (Bank.getItem(primaryId) != null)
+                    primary = Bank.getItem(primaryId);
                 
-                if (Bank.getItem(SECONDARY_ID) != null)
-                    secondary = Bank.getItem(SECONDARY_ID);
+                if (Bank.getItem(secondaryId) != null)
+                    secondary = Bank.getItem(secondaryId);
                 
                 if (primary != null && secondary != null)
                 {
+                    Logger.addMessage("Withdrawing recipe items");
+
                     Menu.sendAction(776, primary.getId() - 1, primary.getSlot(), 5382);
 
                     Time.sleep(250);
@@ -90,6 +97,8 @@ public class Banker implements Strategy
                 }
                 else
                 {
+                    Logger.addMessage("Stopping the script - there are no more supplies", true);
+
                     MinimalPotions.forceLogout();
 
                     Time.sleep(new SleepCondition()
@@ -107,7 +116,7 @@ public class Banker implements Strategy
                     }
                     else
                     {
-                        System.out.println("Ask Minimal to update the hooks");
+                        Logger.addMessage("Ask Minimal to update the hooks", true);
 
                         System.exit(0);
                     }

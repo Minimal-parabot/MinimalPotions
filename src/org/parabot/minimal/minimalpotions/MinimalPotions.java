@@ -1,5 +1,6 @@
 package org.parabot.minimal.minimalpotions;
 
+import org.parabot.core.ui.Logger;
 import org.parabot.environment.api.interfaces.Paintable;
 import org.parabot.environment.api.utils.Time;
 import org.parabot.environment.api.utils.Timer;
@@ -13,18 +14,17 @@ import org.rev317.min.api.events.listeners.MessageListener;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 @ScriptManifest(author = "Minimal",
+        name = "Minimal Potions",
         category = Category.HERBLORE,
         description = "Creates potions on the Ikov server.",
-        name = "Minimal Potions",
         servers = { "Ikov" },
-        version = 1.0)
+        version = 1.1)
 
 public class MinimalPotions extends Script implements Paintable, MessageListener
 {
@@ -32,18 +32,14 @@ public class MinimalPotions extends Script implements Paintable, MessageListener
 
     private final Image IMG = getImage("http://i.imgur.com/pKxdbKS.png");
 
-    private Timer timer;
-
-    public static String status = "";
+    private Timer timer = new Timer();
 
     private int potionsMade = 0;
-
-    private boolean showPaint = false;
 
     @Override
     public boolean onExecute()
     {
-        PotionsGUI gui = new PotionsGUI();
+        MinimalPotionsGUI gui = new MinimalPotionsGUI();
         gui.setVisible(true);
 
         while (gui.isVisible())
@@ -52,10 +48,6 @@ public class MinimalPotions extends Script implements Paintable, MessageListener
         }
 
         Potion potion = gui.getPotion();
-
-        timer = new Timer();
-
-        showPaint = true;
 
         strategies.add(new Relog());
         strategies.add(new MakePotions(potion));
@@ -72,13 +64,9 @@ public class MinimalPotions extends Script implements Paintable, MessageListener
 
         g.setColor(new Color(31, 34, 50));
 
-        if (showPaint)
-        {
-            g.drawImage(IMG, 550, 209, null);
-            g.drawString(status, 15, 25);
-            g.drawString("Time: " + timer.toString(), 560, 275);
-            g.drawString("Potions: " + commas.format(potionsMade), 560, 331);
-        }
+        g.drawImage(IMG, 550, 209, null);
+        g.drawString("Time: " + timer.toString(), 560, 275);
+        g.drawString("Potions: " + commas.format(potionsMade), 560, 331);
     }
     
     @Override
@@ -88,17 +76,16 @@ public class MinimalPotions extends Script implements Paintable, MessageListener
         {
             String message = m.getMessage().toLowerCase();
 
-            if (message.contains("you make a"))
+            if (message.contains("object") || message.contains("not in a")
+                    || message.contains("is already on") || message.contains("exist"))
             {
-                potionsMade++;
-            }
-            else if (message.contains("object") || message.contains("not in a")
-                    || message.contains("is already on") || message.contains("exist")
-                    || message.contains("receive"))
-            {
-                MinimalPotions.status = "Nulled account";
+                Logger.addMessage("Account is nulled", true);
 
                 forceLogout();
+            }
+            else if (message.contains("you make a"))
+            {
+                potionsMade++;
             }
         }
     }
@@ -109,7 +96,7 @@ public class MinimalPotions extends Script implements Paintable, MessageListener
         {
             return ImageIO.read(new URL(str));
         }
-        catch(IOException e)
+        catch(Exception e)
         {
             return null;
         }

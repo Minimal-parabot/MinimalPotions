@@ -1,5 +1,6 @@
 package org.parabot.minimal.minimalpotions;
 
+import org.parabot.core.ui.Logger;
 import org.parabot.environment.api.utils.Time;
 import org.parabot.environment.scripts.framework.SleepCondition;
 import org.parabot.environment.scripts.framework.Strategy;
@@ -10,19 +11,19 @@ import org.rev317.min.api.wrappers.Item;
 
 public class MakePotions implements Strategy
 {
-    private final int PRIMARY_ID;
-    private final int SECONDARY_ID;
+    private final int primaryId;
+    private final int secondaryId;
 
-    public MakePotions(final Potion POTION)
+    public MakePotions(Potion potion)
     {
-        this.PRIMARY_ID = POTION.getPrimaryId();
-        this.SECONDARY_ID = POTION.getSecondaryId();
+        this.primaryId = potion.getPrimaryId();
+        this.secondaryId = potion.getSecondaryId();
     }
 
     @Override
     public boolean activate()
     {
-        return Inventory.contains(PRIMARY_ID) && Inventory.contains(SECONDARY_ID);
+        return Inventory.contains(primaryId) && Inventory.contains(secondaryId);
     }
 
     @Override
@@ -30,7 +31,8 @@ public class MakePotions implements Strategy
     {
         if (Bank.isOpen())
         {
-            // Closes the bank
+            Logger.addMessage("Closing the bank", true);
+
             Menu.sendAction(200, -1, -1, 5384);
 
             Time.sleep(new SleepCondition()
@@ -45,13 +47,14 @@ public class MakePotions implements Strategy
 
         if (!Bank.isOpen())
         {
-            Item[] primaries = Inventory.getItems(PRIMARY_ID);
-            Item[] secondaries = Inventory.getItems(SECONDARY_ID);
+            Logger.addMessage("Making potions", true);
 
+            Item[] primaries = Inventory.getItems(primaryId);
+            Item[] secondaries = Inventory.getItems(secondaryId);
+
+            // I don't like using Inventory.combine() for this
             for (int i = 0; i < secondaries.length; i++)
             {
-                MinimalPotions.status = "Potion " + i;
-
                 Menu.sendAction(447, primaries[i].getId() - 1, primaries[i].getSlot(), 3214);
 
                 Time.sleep(50, 75);
@@ -66,7 +69,7 @@ public class MakePotions implements Strategy
                 @Override
                 public boolean isValid()
                 {
-                    return !(Inventory.contains(PRIMARY_ID, SECONDARY_ID));
+                    return !(Inventory.contains(primaryId, secondaryId));
                 }
             }, 500);
         }
